@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%; /* Modified width to make it wider */
+            max-width: 800px; /* Modified max-width for better responsiveness */
+        }
+
+        h1, h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .game {
+            margin-bottom: 15px;
+        }
+
+        .board {
+            display:grid;
+            grid-template-columns: repeat(3, 80px); /* Modified grid-template-columns */
+            grid-gap: 8px; /* Modified grid-gap */
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .cell {
+            width: 80px; /* Modified width */
+            height: 80px; /* Modified height */
+            background-color: #fff;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 28px; /* Modified font-size */
+            transition: background-color 0.3s;
+        }
+
+        .cell:hover {
+            background-color: #e0e0e0;
+        }
+
+        .reset-button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px; /* Modified padding */
+            cursor: pointer;
+            font-size: 14px; /* Modified font-size */
+            transition: background-color 0.3s;
+            margin-bottom: 8px; /* Modified margin-bottom */
+        }
+
+        .reset-button:hover {
+            background-color: #555;
+        }
+
+        .score {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .score div {
+            margin-bottom: 8px; /* Modified margin-bottom */
+            font-size: 18px; /* Modified font-size */
+        }
+
+        .color-picker {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .color-picker label {
+            font-size: 14px; /* Modified font-size */
+            margin-right: 8px; /* Modified margin-right */
+        }
+
+        .color-picker input[type="color"] {
+            border: none;
+            border-radius: 5px;
+            padding: 4px; /* Modified padding */
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tic Tac Toe</h1>
+    <div class="game">
+        <div class="board">
+            <div class="cell" id="cell-0"></div>
+            <div class="cell" id="cell-1"></div>
+            <div class="cell" id="cell-2"></div>
+            <div class="cell" id="cell-3"></div>
+            <div class="cell" id="cell-4"></div>
+            <div class="cell" id="cell-5"></div>
+            <div class="cell" id="cell-6"></div>
+            <div class="cell" id="cell-7"></div>
+            <div class="cell" id="cell-8"></div>
+        </div>
+    </div>
+    <div class="score">
+        <div id="player-x-score">Player X: 0</div>
+        <div id="player-o-score">Player O: 0</div>
+    </div>
+    <button class="reset-button" onclick="resetScore()">Reset Score</button>
+    <button class="reset-button" onclick="resetBoard()">Reset Board</button>
+    <br>
+    <label for="layout-color-picker">Layout Color:</label>
+    <input type="color" id="layout-color-picker" onchange="changeLayoutColor(this.value)">
+    <br>
+    <label for="background-color-picker">Background Color:</label>
+    <input type="color" id="background-color-picker" onchange="changeBackgroundColor(this.value)">
+    <br>
+    <label for="board-color-picker">Board Color:</label>
+    <input type="color" id="board-color-picker" onchange="changeBoardColor(this.value)">
+    <br>
+    <button class="reset-button" onclick="resetColors()">Reset All Colors</button>
+    <br>
+    <label for="player-x-name">Player X Name:</label>
+    <input type="text" id="player-x-name" value="Player X">
+    <br>
+    <label for="player-o-name">Player O Name:</label>
+    <input type="text" id="player-o-name" value="Player O">
+    <br>
+    <button class="reset-button" onclick="changePlayerNames()">Change Player Names</button>
+</div>
+
+<script>
+    let currentPlayer = 'X';
+    let playerXScore = 0;
+    let playerOScore = 0;
+    let gameBoard = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+
+    const checkWinner = () => {
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        for (let condition of winningConditions) {
+            const [a, b, c] = condition;
+            if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const updateScore = () => {
+        document.getElementById('player-x-score').textContent = `${getPlayerXName()}: ${playerXScore}`;
+        document.getElementById('player-o-score').textContent = `${getPlayerOName()}: ${playerOScore}`;
+    };
+
+    const resetScore = () => {
+        playerXScore = 0;
+        playerOScore = 0;
+        updateScore();
+    };
+
+    const resetBoard = () => {
+        gameBoard = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        currentPlayer = 'X';
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            cell.textContent = '';
+        });
+    };
+
+    const handleCellClick = (cell, index) => {
+        if (gameBoard[index] === '' && gameActive) {
+            gameBoard[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            if (checkWinner()) {
+                if (currentPlayer === 'X') {
+                    playerXScore++;
+                } else {
+                    playerOScore++;
+                }
+                updateScore();
+                gameActive = false;
+                setTimeout(() => {
+                    alert(`Player ${currentPlayer} wins!`);
+                    resetBoard();
+                }, 100);
+            } else if (!gameBoard.includes('')) {
+                gameActive = false;
+                setTimeout(() => {
+                    alert('It\'s a tie!');
+                    resetBoard();
+                }, 100);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
+    };
+
+    const changeLayoutColor = (color) => {
+        document.querySelector('.container').style.backgroundColor = color;
+    };
+
+    const changeBackgroundColor = (color) => {
+        document.body.style.backgroundColor = color;
+    };
+  
+    const changeBoardColor = (color) => {
+        document.querySelector('.board').style.backgroundColor = color;
+    };
+
+    const resetColors = () => {
+        document.getElementById('layout-color-picker').value = '#ffffff';
+        document.getElementById('background-color-picker').value = '#f5f5f5';
+        document.getElementById('board-color-picker').value = '#f2f2f2';
+        changeLayoutColor('#ffffff');
+        changeBackgroundColor('#f5f5f5');
+        changeBoardColor('#f2f2f2');
+    };
+    
+    const getPlayerXName = () => {
+        return document.getElementById('player-x-name').value || 'Player X';
+    };
+
+    const getPlayerOName = () => {
+        return document.getElementById('player-o-name').value || 'Player O';
+    };
+
+    const changePlayerNames = () => {
+        updateScore();
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, index) => {
+            cell.addEventListener('click', () => {
+                handleCellClick(cell, index);
+            });
+        });
+
+        updateScore();
+    });
+</script>
+
+</body>
+</html>
